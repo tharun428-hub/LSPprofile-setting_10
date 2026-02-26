@@ -11,7 +11,7 @@
 - [Roles & Permissions](#roles--permissions)
 - [API Endpoints](#api-endpoints)
 - [Router Architecture](#router-architecture)
-- [System Architecture](#system-architecture)
+- [System Architecture](#system-architecture) 
 - [RBAC Permission Matrix](#rbac-permission-matrix)
 - [Database Connection Flow](#database-connection-flow)
 - [Request Lifecycle](#request-lifecycle)
