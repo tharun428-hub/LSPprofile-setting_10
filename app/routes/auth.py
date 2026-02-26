@@ -17,9 +17,6 @@ from app.core.auth import (
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-# ==========================================
-# REGISTER USER
-# ==========================================
 @router.post("/register")
 def register_user(
     name: str,
@@ -28,7 +25,7 @@ def register_user(
     db: Session = Depends(get_db)
 ):
 
-    # Check if email already exists
+    
     existing_user = db.query(User).filter(
         User.email == email
     ).first()
@@ -39,7 +36,7 @@ def register_user(
             detail="Email already registered"
         )
 
-    # Create new user
+    
     new_user = User(
         name=name,
         email=email,
@@ -51,7 +48,7 @@ def register_user(
     db.commit()
     db.refresh(new_user)
 
-    # 🔥 Automatically create user settings
+  
     new_settings = UserSettings(
         user_id=new_user.id
     )
@@ -65,9 +62,7 @@ def register_user(
     }
 
 
-# ==========================================
-# LOGIN USER
-# ==========================================
+
 @router.post("/login")
 def login_user(
     request: Request,
@@ -98,7 +93,7 @@ def login_user(
 
     refresh_token = create_refresh_token()
 
-    # Create user session
+    
     session = UserSession(
         user_id=user.id,
         device_name="web",

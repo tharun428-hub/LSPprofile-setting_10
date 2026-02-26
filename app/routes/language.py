@@ -14,7 +14,7 @@ router = APIRouter(
     tags=["Settings - Language"],
     dependencies=[Depends(oauth2_scheme)]   
 )
-# GET LANGUAGE
+
 @router.get("/")
 def get_language(
     db: Session = Depends(get_db),
@@ -38,7 +38,7 @@ def get_language(
         "user_id": current_user.id,
         "language": language.language
     }
-# UPDATE LANGUAGE
+
 @router.put("/")
 def update_language(
     data: LanguageUpdate,

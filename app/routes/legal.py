@@ -3,7 +3,7 @@ from fastapi import APIRouter
 router = APIRouter(prefix="/legal", tags=["Legal"])
 
 
-#terms & conditions 
+
 @router.get("/terms")
 def terms():
     return {
@@ -12,7 +12,7 @@ def terms():
     }
 
 
-#privacy policy  
+
 @router.get("/privacy-policy")
 def privacy_policy():
     return {
@@ -21,7 +21,7 @@ def privacy_policy():
     }
 
 
-# app version 
+
 @router.get("/app-version")
 def app_version():
     return {

@@ -21,14 +21,14 @@ router = APIRouter(
     tags=["Notification"],
     dependencies=[Depends(oauth2_scheme)]   
 )
-# GET NOTIFICATION SETTINGS
+
 @router.get("/", response_model=NotificationResponse)
 def read_notification(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_required)
 ):
     return get_notification(db, current_user.id)
-# UPDATE NOTIFICATION
+
 @router.put("/", response_model=NotificationResponse)
 def update_notification_settings(
     data: NotificationUpdate,

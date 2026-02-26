@@ -34,18 +34,18 @@ def get_profile(
         designation=profile.designation,
         date_of_birth=profile.date_of_birth
     )
-# unlock account 
+
 @router.post("/api/v1/user/unlock")
 def unlock_account(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
 
-    # already unlocked
+    
     if not current_user.account_locked:
         return {"message": "Account already unlocked"}
 
-    # direct unlock (no admin)
+    
     current_user.account_locked = False
     db.commit()
 

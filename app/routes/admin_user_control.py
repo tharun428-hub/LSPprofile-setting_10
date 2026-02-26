@@ -7,7 +7,7 @@ from app.core.permissions import super_admin_required
 router = APIRouter(prefix="/admin/user", tags=["Admin User Control"])
 
 
-# LOCK USER
+
 @router.put("/lock/{user_id}")
 def lock_user(
     user_id: int,
@@ -26,7 +26,7 @@ def lock_user(
     return {"message": "User account locked"}
 
 
-# UNLOCK USER
+
 @router.put("/unlock/{user_id}")
 def unlock_user(
     user_id: int,

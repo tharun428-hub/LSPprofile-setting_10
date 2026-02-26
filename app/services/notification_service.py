@@ -3,14 +3,13 @@ from sqlalchemy.orm import Session
 from app.models.notification import Notification
 
 
-# get notification (auto create if not exists) 
 def get_notification(db: Session, user_id: int):
 
     notification = db.query(Notification).filter(
         Notification.user_id == user_id
     ).first()
 
-    # create default notification if not exists
+    
     if not notification:
         notification = Notification(user_id=user_id)
         db.add(notification)
@@ -20,7 +19,7 @@ def get_notification(db: Session, user_id: int):
     return notification
 
 
-# Update Notification
+
 def update_notification(
     db: Session,
     user_id: int,

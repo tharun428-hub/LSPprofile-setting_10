@@ -11,7 +11,7 @@ router = APIRouter(prefix="/admin/change-request", tags=["Admin Change Request"]
 
 
 
-# GET ALL PENDING REQUESTS
+
 
 @router.get("/")
 def get_pending_requests(
@@ -25,7 +25,7 @@ def get_pending_requests(
     return requests
 
 
-# APPROVE / REJECT
+
 @router.put("/{request_id}")
 def approve_or_reject(
     request_id: int,

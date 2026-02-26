@@ -13,11 +13,11 @@ router = APIRouter(
 )
 
 
-# 🔐 GET SETTINGS (OAuth Protected)
+
 @router.get("/", response_model=SettingsResponse)
 def get_settings(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)  # 🔐 OAuth Applied
+    current_user: User = Depends(get_current_user)  
 ):
     user_settings = db.query(UserSettings).filter(
         UserSettings.user_id == current_user.id
@@ -49,7 +49,7 @@ def update_settings(
             detail="User settings not found"
         )
 
-    # Update only provided fields
+    
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(user_settings, field, value)
 

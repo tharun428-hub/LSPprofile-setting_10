@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class ChangeRequestCreate(BaseModel):
-    request_type: str   # lock or delete
+    request_type: str   
 
 
 class ChangeRequestResponse(BaseModel):

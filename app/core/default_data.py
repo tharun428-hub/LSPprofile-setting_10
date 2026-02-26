@@ -98,7 +98,7 @@ def create_default_users():
                 db.add(user)
                 db.flush()
 
-            # ✅ Create UserSettings if missing
+            
             existing_settings = db.query(UserSettings).filter(
                 UserSettings.user_id == user.id
             ).first()
@@ -117,7 +117,7 @@ def create_default_users():
                 )
                 db.add(settings)
 
-            # ✅ Create Profile if missing
+            
             existing_profile = db.query(UserProfile).filter(
                 UserProfile.user_id == user.id
             ).first()
@@ -135,7 +135,7 @@ def create_default_users():
                 )
                 db.add(profile)
 
-            # ✅ Create EmployeeDetails if missing
+        
             existing_employee = db.query(EmployeeDetails).filter(
                 EmployeeDetails.user_id == user.id
             ).first()
@@ -149,7 +149,7 @@ def create_default_users():
                 )
                 db.add(employee)
 
-            # ✅ Create BankDetails if missing
+
             existing_bank = db.query(BankDetails).filter(
                 BankDetails.user_id == user.id
             ).first()

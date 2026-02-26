@@ -15,7 +15,7 @@ class ProfileChangeRequest(Base):
     new_value = Column(String)
 
     status = Column(String, default="PENDING")
-    # PENDING | APPROVED | REJECTED
+    
 
     requested_at = Column(DateTime, default=datetime.utcnow)
     approved_at = Column(DateTime, nullable=True)

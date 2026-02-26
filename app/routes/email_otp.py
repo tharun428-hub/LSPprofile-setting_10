@@ -16,7 +16,7 @@ router = APIRouter(
 )
 
 
-# SEND OTP TO OLD EMAIL
+
 @router.post("/send-old-email-otp")
 async def send_old_email_otp(
     db: Session = Depends(get_db),
@@ -31,7 +31,7 @@ async def send_old_email_otp(
     await send_otp_email(current_user.email, otp)
 
     return {"message": "OTP sent to old email"}
-# VERIFY OLD EMAIL OTP
+
 @router.post("/verify-old-email-otp")
 def verify_old_email_otp(
     otp: str,
@@ -46,7 +46,7 @@ def verify_old_email_otp(
     db.commit()
 
     return {"message": "Old email verified"}
-# SEND OTP TO NEW EMAIL
+
 @router.post("/send-new-email-otp")
 async def send_new_email_otp(
     new_email: str,
@@ -63,7 +63,7 @@ async def send_new_email_otp(
     await send_otp_email(new_email, otp)
 
     return {"message": "OTP sent to new email"}
-# VERIFY NEW EMAIL OTP
+
 @router.post("/verify-new-email-otp")
 def verify_new_email_otp(
     otp: str,

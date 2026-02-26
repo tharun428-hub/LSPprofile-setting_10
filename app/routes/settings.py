@@ -17,9 +17,7 @@ router = APIRouter(
     dependencies=[Depends(oauth2_scheme)]
 )
 
-# ==========================================
-# GET USER SETTINGS
-# ==========================================
+
 @router.get("/settings")
 def get_settings(
     db: Session = Depends(get_db),
@@ -30,7 +28,7 @@ def get_settings(
     ).first()
 
     if not settings:
-        # Auto create if missing
+        
         settings = UserSettings(user_id=current_user.id)
         db.add(settings)
         db.commit()
@@ -39,9 +37,7 @@ def get_settings(
     return settings
 
 
-# ==========================================
-# UPDATE USER SETTINGS
-# ==========================================
+
 @router.put("/settings")
 def update_settings(
     data: SettingsUpdate,
@@ -69,9 +65,7 @@ def update_settings(
     return {"message": "Settings updated successfully"}
 
 
-# ==========================================
-# DOWNLOAD CONSENT RECORD
-# ==========================================
+
 @router.get("/consent-download")
 def download_consent_record(
     db: Session = Depends(get_db),
@@ -88,9 +82,7 @@ def download_consent_record(
     }
 
 
-# ==========================================
-# ACTIVE SESSIONS
-# ==========================================
+
 @router.get("/active-sessions")
 def active_sessions(
     db: Session = Depends(get_db),
@@ -104,9 +96,7 @@ def active_sessions(
     return sessions
 
 
-# ==========================================
-# LOGOUT ALL DEVICES
-# ==========================================
+
 @router.post("/logout-all")
 def logout_all_devices(
     db: Session = Depends(get_db),

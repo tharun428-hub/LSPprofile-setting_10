@@ -16,9 +16,7 @@ router = APIRouter(
     tags=["Admin"]
 )
 
-# ==========================================
-# Super Admin - View Pending Change Requests
-# ==========================================
+
 @router.get("/change-request")
 def get_requests(
     db: Session = Depends(get_db),
@@ -29,9 +27,7 @@ def get_requests(
     ).all()
 
 
-# ==========================================
-# Super Admin - Approve / Reject Request
-# ==========================================
+
 @router.put("/change-request/{request_id}")
 def approve_or_reject(
     request_id: int,
@@ -70,9 +66,7 @@ def approve_or_reject(
             detail="User settings not found"
         )
 
-    # ===============================
-    # APPROVE LOGIC
-    # ===============================
+    
     if action.lower() == "approve":
 
         if request.request_type.lower() == "lock":
@@ -89,9 +83,7 @@ def approve_or_reject(
 
         request.status = "approved"
 
-    # ===============================
-    # REJECT LOGIC
-    # ===============================
+    
     elif action.lower() == "reject":
         request.status = "rejected"
 
@@ -109,9 +101,7 @@ def approve_or_reject(
     }
 
 
-# ==========================================
-# Admin Dashboard
-# ==========================================
+
 @router.get("/dashboard")
 def admin_dashboard(
     db: Session = Depends(get_db),
@@ -140,9 +130,7 @@ def admin_dashboard(
     }
 
 
-# ==========================================
-# Admin - View Users
-# ==========================================
+
 @router.get("/users")
 def get_all_users(
     db: Session = Depends(get_db),
@@ -165,9 +153,7 @@ def get_all_users(
     ]
 
 
-# ==========================================
-# Super Admin - View Users & Admins
-# ==========================================
+
 @router.get("/all-users")
 def all_users(
     db: Session = Depends(get_db),

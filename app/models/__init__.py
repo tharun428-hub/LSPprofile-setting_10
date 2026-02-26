@@ -1,1 +1,1 @@
-from .user_session import UserSession #REGISTER MODEL
+from .user_session import UserSession 

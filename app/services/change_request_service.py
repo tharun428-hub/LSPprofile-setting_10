@@ -4,7 +4,7 @@ from app.models.change_request import ChangeRequest
 from app.models.user import User
 
 
-# user request
+
 def create_change_request(db: Session, user_id: int, data):
 
     user = db.query(User).filter(User.id == user_id).first()
@@ -33,7 +33,7 @@ def create_change_request(db: Session, user_id: int, data):
     return request
 
 
-# admin approve
+
 def approve_request(db: Session, request_id: int):
 
     request = db.query(ChangeRequest).filter(

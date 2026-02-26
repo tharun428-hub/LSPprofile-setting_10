@@ -9,13 +9,13 @@ class ConsentHistory(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    # Link to user table
+
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    # Example: marketing, third_party, analytics
+    
     consent_type = Column(String, nullable=False)
 
-    # accepted / revoked
+
     status = Column(String, nullable=False)
 
     created_at = Column(DateTime, default=datetime.utcnow)

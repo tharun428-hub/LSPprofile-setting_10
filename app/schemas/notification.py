@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-# BASE SCHEMA (MUST COME FIRST)
+
 class NotificationBase(BaseModel):
     sms: bool
     email: bool
@@ -11,12 +11,12 @@ class NotificationBase(BaseModel):
     push_notification: bool
 
 
-# UPDATE SCHEMA
+
 class NotificationUpdate(NotificationBase):
     pass
 
 
-# RESPONSE SCHEMA
+
 class NotificationResponse(NotificationBase):
     user_id: int
 
