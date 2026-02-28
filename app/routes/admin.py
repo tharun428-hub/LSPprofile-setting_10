@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from app.models.change_request import ChangeRequest
 from app.models.user import User
-from app.models.user_settings import UserSettings
 
 from app.core.database import get_db
 from app.core.permissions import (
@@ -17,6 +16,9 @@ router = APIRouter(
 )
 
 
+# ===============================
+# GET ALL PENDING CHANGE REQUESTS
+# ===============================
 @router.get("/change-request")
 def get_requests(
     db: Session = Depends(get_db),
@@ -27,7 +29,9 @@ def get_requests(
     ).all()
 
 
-
+# ===============================
+# APPROVE OR REJECT REQUEST
+# ===============================
 @router.put("/change-request/{request_id}")
 def approve_or_reject(
     request_id: int,
@@ -42,7 +46,7 @@ def approve_or_reject(
 
     if not request:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=404,
             detail="Request not found"
         )
 
@@ -52,44 +56,44 @@ def approve_or_reject(
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=404,
             detail="User not found"
         )
 
-    user_settings = db.query(UserSettings).filter(
-        UserSettings.user_id == user.id
-    ).first()
-
-    if not user_settings:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User settings not found"
-        )
-
-    
+    # ===============================
+    # APPROVE
+    # ===============================
     if action.lower() == "approve":
 
-        if request.request_type.lower() == "lock":
-            user_settings.account_locked = True
+        # LOCK ACCOUNT
+        if request.field_name == "lock_account":
+            user.account_locked = True
 
-        elif request.request_type.lower() == "delete":
-            user_settings.is_deleted = True
+        # DELETE ACCOUNT
+        elif request.field_name == "delete_account":
+            user.is_deleted = True
+
+        # EMAIL CHANGE
+        elif request.field_name == "email":
+            user.email = request.new_value
 
         else:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=400,
                 detail="Invalid request type"
             )
 
         request.status = "approved"
 
-    
+    # ===============================
+    # REJECT
+    # ===============================
     elif action.lower() == "reject":
         request.status = "rejected"
 
     else:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=400,
             detail="Action must be approve or reject"
         )
 
@@ -101,7 +105,9 @@ def approve_or_reject(
     }
 
 
-
+# ===============================
+# ADMIN DASHBOARD
+# ===============================
 @router.get("/dashboard")
 def admin_dashboard(
     db: Session = Depends(get_db),
@@ -112,12 +118,12 @@ def admin_dashboard(
         User.role == "USER"
     ).count()
 
-    locked_users = db.query(UserSettings).filter(
-        UserSettings.account_locked == True
+    locked_users = db.query(User).filter(
+        User.account_locked == True
     ).count()
 
-    deleted_users = db.query(UserSettings).filter(
-        UserSettings.is_deleted == True
+    deleted_users = db.query(User).filter(
+        User.is_deleted == True
     ).count()
 
     active_users = total_users - locked_users - deleted_users
@@ -130,7 +136,9 @@ def admin_dashboard(
     }
 
 
-
+# ===============================
+# ADMIN VIEW USERS
+# ===============================
 @router.get("/users")
 def get_all_users(
     db: Session = Depends(get_db),
@@ -153,7 +161,9 @@ def get_all_users(
     ]
 
 
-
+# ===============================
+# SUPER ADMIN VIEW ALL USERS
+# ===============================
 @router.get("/all-users")
 def all_users(
     db: Session = Depends(get_db),

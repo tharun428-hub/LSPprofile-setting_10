@@ -4,7 +4,6 @@ from app.models.change_request import ChangeRequest
 from app.models.user import User
 
 
-
 def create_change_request(db: Session, user_id: int, data):
 
     user = db.query(User).filter(User.id == user_id).first()
@@ -12,10 +11,13 @@ def create_change_request(db: Session, user_id: int, data):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # old value detect
     if data.field_name == "mobile":
         old_value = user.mobile
+
     elif data.field_name == "email":
         old_value = user.email
+
     else:
         raise HTTPException(status_code=400, detail="Invalid field")
 
@@ -23,7 +25,8 @@ def create_change_request(db: Session, user_id: int, data):
         user_id=user_id,
         field_name=data.field_name,
         old_value=old_value,
-        new_value=data.new_value
+        new_value=data.new_value,
+        status="pending"
     )
 
     db.add(request)
@@ -31,7 +34,6 @@ def create_change_request(db: Session, user_id: int, data):
     db.refresh(request)
 
     return request
-
 
 
 def approve_request(db: Session, request_id: int):
@@ -56,4 +58,6 @@ def approve_request(db: Session, request_id: int):
     request.status = "approved"
 
     db.commit()
+    db.refresh(request)
+
     return request

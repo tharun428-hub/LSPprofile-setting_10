@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum,Boolean
+from sqlalchemy import Column, Integer, String, Enum, Boolean
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 import enum
@@ -13,17 +13,34 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+
     name = Column(String)
     mobile = Column(String)
     email = Column(String)
     password = Column(String)
+
     role = Column(String, default="user")
+
+    # =========================
+    # EMAIL OTP FIELDS
+    # =========================
     email_otp = Column(String, nullable=True)
     email_otp_verified = Column(Boolean, default=False)
 
-    profile = relationship("UserProfile", back_populates="user", uselist=False)
-    employee = relationship("EmployeeDetails", back_populates="user", uselist=False)
-    bank = relationship("BankDetails", back_populates="user", uselist=False)
+    # ⭐ ADD THESE (IMPORTANT FIX)
+    new_email = Column(String, nullable=True)
+    new_email_otp = Column(String, nullable=True)
+
+    # =========================
+    # ACCOUNT STATUS
+    # =========================
     account_locked = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
     is_locked = Column(Boolean, default=False)
+
+    # =========================
+    # RELATIONSHIPS
+    # =========================
+    profile = relationship("UserProfile", back_populates="user", uselist=False)
+    employee = relationship("EmployeeDetails", back_populates="user", uselist=False)
+    bank = relationship("BankDetails", back_populates="user", uselist=False)

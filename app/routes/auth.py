@@ -1,111 +1,197 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
+from app.models.change_request import ChangeRequest
 from app.models.user import User
 from app.models.user_settings import UserSettings
-from app.models.user_session import UserSession
 
-from app.core.auth import (
-    verify_password,
-    hash_password,
-    create_access_token,
-    create_refresh_token
+from app.core.database import get_db
+from app.core.permissions import (
+    admin_required,
+    super_admin_required
 )
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(
+    prefix="/admin",
+    tags=["Admin"]
+)
 
 
-@router.post("/register")
-def register_user(
-    name: str,
-    email: str,
-    password: str,
-    db: Session = Depends(get_db)
+# ===============================
+# GET ALL PENDING CHANGE REQUESTS
+# ===============================
+@router.get("/change-request")
+def get_requests(
+    db: Session = Depends(get_db),
+    current_user=Depends(super_admin_required)
+):
+    return db.query(ChangeRequest).filter(
+        ChangeRequest.status == "pending"
+    ).all()
+
+
+# ===============================
+# APPROVE OR REJECT REQUEST
+# ===============================
+@router.put("/change-request/{request_id}")
+def approve_or_reject(
+    request_id: int,
+    action: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(super_admin_required)
 ):
 
-    
-    existing_user = db.query(User).filter(
-        User.email == email
+    request = db.query(ChangeRequest).filter(
+        ChangeRequest.id == request_id
     ).first()
 
-    if existing_user:
+    if not request:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Request not found"
         )
 
-    
-    new_user = User(
-        name=name,
-        email=email,
-        password=hash_password(password),
-        role="USER"
-    )
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-  
-    new_settings = UserSettings(
-        user_id=new_user.id
-    )
-
-    db.add(new_settings)
-    db.commit()
-
-    return {
-        "message": "User registered successfully",
-        "user_id": new_user.id
-    }
-
-
-
-@router.post("/login")
-def login_user(
-    request: Request,
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
-):
-
     user = db.query(User).filter(
-        User.email == form_data.username
+        User.id == request.user_id
     ).first()
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
 
-    if not verify_password(form_data.password, user.password):
+    user_settings = db.query(UserSettings).filter(
+        UserSettings.user_id == user.id
+    ).first()
+
+    if not user_settings:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid password"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User settings not found"
         )
 
-    access_token = create_access_token({
-        "sub": str(user.id),
-        "role": user.role
-    })
+    # ===============================
+    # APPROVE LOGIC
+    # ===============================
+    if action.lower() == "approve":
 
-    refresh_token = create_refresh_token()
+        # LOCK ACCOUNT
+        if request.field_name.lower() == "lock_account":
+            user_settings.account_locked = True
 
-    
-    session = UserSession(
-        user_id=user.id,
-        device_name="web",
-        ip_address=request.client.host
-    )
+        # DELETE ACCOUNT
+        elif request.field_name.lower() == "delete_account":
+            user_settings.is_deleted = True
 
-    db.add(session)
+        # EMAIL CHANGE
+        elif request.field_name.lower() == "email":
+            user.email = request.new_value
+
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid request type"
+            )
+
+        request.status = "approved"
+
+    # ===============================
+    # REJECT LOGIC
+    # ===============================
+    elif action.lower() == "reject":
+        request.status = "rejected"
+
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Action must be approve or reject"
+        )
+
     db.commit()
 
     return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "refresh_token": refresh_token,
-        "role": user.role
+        "message": f"Request {request.status}",
+        "user_id": user.id
     }
+
+
+# ===============================
+# ADMIN DASHBOARD
+# ===============================
+@router.get("/dashboard")
+def admin_dashboard(
+    db: Session = Depends(get_db),
+    current_user=Depends(admin_required)
+):
+
+    total_users = db.query(User).filter(
+        User.role == "USER"
+    ).count()
+
+    locked_users = db.query(UserSettings).filter(
+        UserSettings.account_locked == True
+    ).count()
+
+    deleted_users = db.query(UserSettings).filter(
+        UserSettings.is_deleted == True
+    ).count()
+
+    active_users = total_users - locked_users - deleted_users
+
+    return {
+        "total_users": total_users,
+        "active_users": active_users,
+        "locked_users": locked_users,
+        "deleted_users": deleted_users
+    }
+
+
+# ===============================
+# ADMIN VIEW USERS
+# ===============================
+@router.get("/users")
+def get_all_users(
+    db: Session = Depends(get_db),
+    current_user=Depends(admin_required)
+):
+
+    users = db.query(User).filter(
+        User.role == "USER"
+    ).all()
+
+    return [
+        {
+            "id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "mobile": u.mobile,
+            "role": u.role
+        }
+        for u in users
+    ]
+
+
+# ===============================
+# SUPER ADMIN VIEW ALL USERS
+# ===============================
+@router.get("/all-users")
+def all_users(
+    db: Session = Depends(get_db),
+    current_user=Depends(super_admin_required)
+):
+
+    users = db.query(User).filter(
+        User.role.in_(["USER", "ADMIN"])
+    ).all()
+
+    return [
+        {
+            "id": u.id,
+            "name": u.name,
+            "email": u.email,
+            "mobile": u.mobile,
+            "role": u.role
+        }
+        for u in users
+    ]
