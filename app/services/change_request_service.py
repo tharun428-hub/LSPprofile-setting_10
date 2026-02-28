@@ -11,7 +11,7 @@ def create_change_request(db: Session, user_id: int, data):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # old value detect
+    
     if data.field_name == "mobile":
         old_value = user.mobile
 

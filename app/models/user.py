@@ -21,26 +21,20 @@ class User(Base):
 
     role = Column(String, default="user")
 
-    # =========================
-    # EMAIL OTP FIELDS
-    # =========================
+    
     email_otp = Column(String, nullable=True)
     email_otp_verified = Column(Boolean, default=False)
 
-    # ⭐ ADD THESE (IMPORTANT FIX)
+  
     new_email = Column(String, nullable=True)
     new_email_otp = Column(String, nullable=True)
 
-    # =========================
-    # ACCOUNT STATUS
-    # =========================
+  
     account_locked = Column(Boolean, default=False)
     is_deleted = Column(Boolean, default=False)
     is_locked = Column(Boolean, default=False)
 
-    # =========================
-    # RELATIONSHIPS
-    # =========================
+   
     profile = relationship("UserProfile", back_populates="user", uselist=False)
     employee = relationship("EmployeeDetails", back_populates="user", uselist=False)
     bank = relationship("BankDetails", back_populates="user", uselist=False)

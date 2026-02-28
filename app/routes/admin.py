@@ -15,10 +15,6 @@ router = APIRouter(
     tags=["Admin"]
 )
 
-
-# ===============================
-# GET ALL PENDING CHANGE REQUESTS
-# ===============================
 @router.get("/change-request")
 def get_requests(
     db: Session = Depends(get_db),
@@ -29,9 +25,6 @@ def get_requests(
     ).all()
 
 
-# ===============================
-# APPROVE OR REJECT REQUEST
-# ===============================
 @router.put("/change-request/{request_id}")
 def approve_or_reject(
     request_id: int,
@@ -60,9 +53,6 @@ def approve_or_reject(
             detail="User not found"
         )
 
-    # ===============================
-    # APPROVE
-    # ===============================
     if action.lower() == "approve":
 
         # LOCK ACCOUNT
@@ -85,9 +75,6 @@ def approve_or_reject(
 
         request.status = "approved"
 
-    # ===============================
-    # REJECT
-    # ===============================
     elif action.lower() == "reject":
         request.status = "rejected"
 
@@ -105,9 +92,6 @@ def approve_or_reject(
     }
 
 
-# ===============================
-# ADMIN DASHBOARD
-# ===============================
 @router.get("/dashboard")
 def admin_dashboard(
     db: Session = Depends(get_db),
@@ -135,10 +119,6 @@ def admin_dashboard(
         "deleted_users": deleted_users
     }
 
-
-# ===============================
-# ADMIN VIEW USERS
-# ===============================
 @router.get("/users")
 def get_all_users(
     db: Session = Depends(get_db),
@@ -161,9 +141,6 @@ def get_all_users(
     ]
 
 
-# ===============================
-# SUPER ADMIN VIEW ALL USERS
-# ===============================
 @router.get("/all-users")
 def all_users(
     db: Session = Depends(get_db),

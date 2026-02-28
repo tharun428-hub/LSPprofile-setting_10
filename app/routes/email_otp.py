@@ -15,9 +15,6 @@ router = APIRouter(
 )
 
 
-# ==================================
-# SEND OTP TO OLD EMAIL (LOGIN REQUIRED)
-# ==================================
 @router.post(
     "/send-old-email-otp",
     dependencies=[Depends(oauth2_scheme)]
@@ -37,9 +34,6 @@ async def send_old_email_otp(
     return {"message": "OTP sent to old email"}
 
 
-# ==================================
-# VERIFY OLD EMAIL OTP (LOGIN REQUIRED)
-# ==================================
 @router.post(
     "/verify-old-email-otp",
     dependencies=[Depends(oauth2_scheme)]
@@ -59,9 +53,6 @@ def verify_old_email_otp(
     return {"message": "Old email verified"}
 
 
-# ==================================
-# SEND OTP TO NEW EMAIL (LOGIN REQUIRED)
-# ==================================
 @router.post(
     "/send-new-email-otp",
     dependencies=[Depends(oauth2_scheme)]
@@ -95,9 +86,6 @@ async def send_new_email_otp(
     return {"message": "OTP sent to new email"}
 
 
-# ==================================
-# VERIFY NEW EMAIL OTP (LOGIN REQUIRED)
-# ==================================
 @router.post(
     "/verify-new-email-otp",
     dependencies=[Depends(oauth2_scheme)]
@@ -123,9 +111,6 @@ def verify_new_email_otp(
     return {"message": "Email updated successfully"}
 
 
-# ==================================
-# SEND UNLOCK OTP (NO LOGIN REQUIRED)
-# ==================================
 @router.post("/send-unlock-otp")
 async def send_unlock_otp(
     email: str,
@@ -152,9 +137,6 @@ async def send_unlock_otp(
     return {"message": "Unlock OTP sent to email"}
 
 
-# ==================================
-# VERIFY OTP & UNLOCK ACCOUNT (NO LOGIN)
-# ==================================
 @router.post("/unlock-account")
 def unlock_account(
     email: str,
