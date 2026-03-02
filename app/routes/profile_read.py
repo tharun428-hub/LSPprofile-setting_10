@@ -35,6 +35,7 @@ def get_profile(
         date_of_birth=profile.date_of_birth
     )
 
+
 @router.post("/api/v1/user/unlock")
 def unlock_account(
     db: Session = Depends(get_db),

@@ -1,174 +1,65 @@
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from app.models.change_request import ChangeRequest
-from app.models.user import User
-from app.models.user_settings import UserSettings
-
 from app.core.database import get_db
-from app.core.permissions import (
-    admin_required,
-    super_admin_required
-)
+from app.models.user import User
 
 router = APIRouter(
-    prefix="/admin",
-    tags=["Admin"]
+    prefix="/auth",
+    tags=["Auth"]
 )
 
-@router.get("/change-request")
-def get_requests(
-    db: Session = Depends(get_db),
-    current_user=Depends(super_admin_required)
+SECRET_KEY = "your_secret_key_here"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+
+    expire = datetime.utcnow() + (
+        expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+
+    to_encode.update({"exp": expire})
+
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+@router.post("/login")
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
 ):
-    return db.query(ChangeRequest).filter(
-        ChangeRequest.status == "pending"
-    ).all()
-
-
-@router.put("/change-request/{request_id}")
-def approve_or_reject(
-    request_id: int,
-    action: str,
-    db: Session = Depends(get_db),
-    current_user=Depends(super_admin_required)
-):
-
-    request = db.query(ChangeRequest).filter(
-        ChangeRequest.id == request_id
-    ).first()
-
-    if not request:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Request not found"
-        )
 
     user = db.query(User).filter(
-        User.id == request.user_id
+        User.email == form_data.username
     ).first()
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
         )
 
-    user_settings = db.query(UserSettings).filter(
-        UserSettings.user_id == user.id
-    ).first()
-
-    if not user_settings:
+    
+    if user.password != form_data.password:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User settings not found"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
         )
 
-    if action.lower() == "approve":
-
-        
-        if request.field_name.lower() == "lock_account":
-            user_settings.account_locked = True
-
-        
-        elif request.field_name.lower() == "delete_account":
-            user_settings.is_deleted = True
-
-        elif request.field_name.lower() == "email":
-            user.email = request.new_value
-
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid request type"
-            )
-
-        request.status = "approved"
-
-    elif action.lower() == "reject":
-        request.status = "rejected"
-
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Action must be approve or reject"
-        )
-
-    db.commit()
+    access_token = create_access_token(
+        data={
+            "sub": str(user.id),
+            "role": user.role
+        }
+    )
 
     return {
-        "message": f"Request {request.status}",
-        "user_id": user.id
+        "access_token": access_token,
+        "token_type": "bearer",
+        "role": user.role
     }
-
-
-@router.get("/dashboard")
-def admin_dashboard(
-    db: Session = Depends(get_db),
-    current_user=Depends(admin_required)
-):
-
-    total_users = db.query(User).filter(
-        User.role == "USER"
-    ).count()
-
-    locked_users = db.query(UserSettings).filter(
-        UserSettings.account_locked == True
-    ).count()
-
-    deleted_users = db.query(UserSettings).filter(
-        UserSettings.is_deleted == True
-    ).count()
-
-    active_users = total_users - locked_users - deleted_users
-
-    return {
-        "total_users": total_users,
-        "active_users": active_users,
-        "locked_users": locked_users,
-        "deleted_users": deleted_users
-    }
-
-
-@router.get("/users")
-def get_all_users(
-    db: Session = Depends(get_db),
-    current_user=Depends(admin_required)
-):
-
-    users = db.query(User).filter(
-        User.role == "USER"
-    ).all()
-
-    return [
-        {
-            "id": u.id,
-            "name": u.name,
-            "email": u.email,
-            "mobile": u.mobile,
-            "role": u.role
-        }
-        for u in users
-    ]
-
-
-@router.get("/all-users")
-def all_users(
-    db: Session = Depends(get_db),
-    current_user=Depends(super_admin_required)
-):
-
-    users = db.query(User).filter(
-        User.role.in_(["USER", "ADMIN"])
-    ).all()
-
-    return [
-        {
-            "id": u.id,
-            "name": u.name,
-            "email": u.email,
-            "mobile": u.mobile,
-            "role": u.role
-        }
-        for u in users
-    ]
