@@ -6,18 +6,16 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.models.user import User
-from app.core.auth import verify_password   
-
+from app.core.auth import (
+    verify_password,
+    SECRET_KEY,
+    ALGORITHM
+)
 router = APIRouter(
     prefix="/auth",
     tags=["Auth"]
 )
-
-SECRET_KEY = "your_secret_key_here"
-ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
-
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
 
