@@ -22,7 +22,9 @@ import app.models.consent
 
 
 app = FastAPI(title="User Profile API")
-
+@app.get("/")
+def root():
+    return {"message": "User Profile API is running"}
 
 @app.on_event("startup")
 def startup_event():
