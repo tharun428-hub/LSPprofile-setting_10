@@ -18,6 +18,7 @@ pwd_context = CryptContext(
     schemes=["bcrypt"],
     deprecated="auto"
 )
+
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="auth/login"
 )
@@ -43,10 +44,6 @@ def create_access_token(data: dict):
         SECRET_KEY,
         algorithm=ALGORITHM
     )
-
-
-def create_refresh_token():
-    return "refresh_token_sample"
 
 
 def decode_access_token(token: str):

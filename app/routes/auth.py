@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from jose import JWTError, jwt
+from jose import jwt
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.models.user import User
+from app.core.auth import verify_password   
 
 router = APIRouter(
     prefix="/auth",
@@ -15,6 +16,7 @@ router = APIRouter(
 SECRET_KEY = "your_secret_key_here"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
@@ -34,10 +36,12 @@ def login(
     db: Session = Depends(get_db)
 ):
 
+    
     user = db.query(User).filter(
         User.email == form_data.username
     ).first()
 
+    
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -45,11 +49,15 @@ def login(
         )
 
     
-    if user.password != form_data.password:
+    if not verify_password(
+        form_data.password,
+        user.password
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
+
 
     access_token = create_access_token(
         data={
@@ -61,5 +69,6 @@ def login(
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "role": user.role
+        "role": user.role,
+        "message": "Login successful"
     }
