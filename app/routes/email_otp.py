@@ -63,11 +63,11 @@ async def send_new_email_otp(
     current_user: User = Depends(user_required)
 ):
 
-    # prevent same email
+    
     if new_email == current_user.email:
         raise HTTPException(400, "New email cannot be same")
 
-    # check existing email
+    
     existing_user = db.query(User).filter(
         User.email == new_email
     ).first()
@@ -99,10 +99,9 @@ def verify_new_email_otp(
     if current_user.new_email_otp != otp:
         raise HTTPException(400, "Invalid OTP")
 
-    # update email (NO new user created)
+
     current_user.email = current_user.new_email
 
-    # clear temp fields
     current_user.new_email = None
     current_user.new_email_otp = None
 
@@ -154,7 +153,7 @@ def unlock_account(
     if user.email_otp != otp:
         raise HTTPException(400, "Invalid OTP")
 
-    # unlock account
+    
     user.account_locked = False
     user.email_otp = None
 

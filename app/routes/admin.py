@@ -55,15 +55,15 @@ def approve_or_reject(
 
     if action.lower() == "approve":
 
-        # LOCK ACCOUNT
+        
         if request.field_name == "lock_account":
             user.account_locked = True
 
-        # DELETE ACCOUNT
+        
         elif request.field_name == "delete_account":
             user.is_deleted = True
 
-        # EMAIL CHANGE
+    
         elif request.field_name == "email":
             user.email = request.new_value
 

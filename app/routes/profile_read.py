@@ -8,7 +8,7 @@ from app.models.user import User
 from app.core.auth import get_current_user
 
 router = APIRouter(prefix="", tags=["Profile"])
-# get user profile
+
 @router.get("/api/v1/user/profile", response_model=UserProfileResponse)
 def get_profile(
     db: Session = Depends(get_db),

@@ -80,7 +80,7 @@ def create_default_users():
 
         for data in users_data:
 
-            # 🔍 Check if user already exists by email
+        
             existing_user = db.query(User).filter(
                 User.email == data["email"]
             ).first()
@@ -110,7 +110,7 @@ def create_default_users():
                     pin_enabled=False,
                     account_locked=False,
                     is_deleted=False,
-                    language="en",
+                    language="english",
                     push_notification=True,
                     sms_notification=True,
                     email_notification=True
