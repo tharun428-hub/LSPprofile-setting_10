@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from app.core.database import Base, engine, SessionLocal
 from app.core.default_data import create_default_users
 
-
+import app.services.cloudinary_config
 from app.routes import auth, admin
 from app.routes.profile_read import router as read_router
 from app.routes.profile_address import router as address_router

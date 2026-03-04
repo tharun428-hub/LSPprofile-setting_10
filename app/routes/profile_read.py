@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException ,UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -7,7 +7,31 @@ from app.schemas.user_profile import UserProfileResponse
 from app.models.user import User
 from app.core.auth import get_current_user
 
+from firebase_admin import storage
+from app.services.auth_dependency import verify_token
 router = APIRouter(prefix="", tags=["Profile"])
+
+@router.post("/upload-profile-image")
+def upload_profile_image(
+    file: UploadFile = File(...),
+    user = Depends(verify_token)
+):
+
+    bucket = storage.bucket()
+
+    blob = bucket.blob(f"profile_images/{user['sub']}.jpg")
+
+    blob.upload_from_file(
+        file.file,
+        content_type=file.content_type
+    )
+
+    blob.make_public()
+
+    return {
+        "message": "Profile image uploaded successfully",
+        "image_url": blob.public_url
+    }
 
 @router.get("/api/v1/user/profile", response_model=UserProfileResponse)
 def get_profile(

@@ -21,7 +21,7 @@ class User(Base):
 
     role = Column(String, default="user")
 
-    
+    profile_image = Column(String, nullable=True)
     email_otp = Column(String, nullable=True)
     email_otp_verified = Column(Boolean, default=False)
 
