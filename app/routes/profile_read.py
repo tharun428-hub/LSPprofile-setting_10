@@ -13,7 +13,7 @@ router = APIRouter(prefix="", tags=["Profile"])
 import cloudinary.uploader
 from fastapi import UploadFile, File, Depends
 
-@router.post("/upload-profile-image")
+@router.post("/api/v1/user/profile-image")
 def upload_profile_image(
     file: UploadFile = File(...),
     user = Depends(verify_token)
