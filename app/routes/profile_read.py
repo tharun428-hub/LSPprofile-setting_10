@@ -10,6 +10,8 @@ from app.core.auth import get_current_user
 from firebase_admin import storage
 from app.services.auth_dependency import verify_token
 router = APIRouter(prefix="", tags=["Profile"])
+import cloudinary.uploader
+from fastapi import UploadFile, File, Depends
 
 @router.post("/upload-profile-image")
 def upload_profile_image(
@@ -17,22 +19,16 @@ def upload_profile_image(
     user = Depends(verify_token)
 ):
 
-    bucket = storage.bucket()
-
-    blob = bucket.blob(f"profile_images/{user['sub']}.jpg")
-
-    blob.upload_from_file(
+    result = cloudinary.uploader.upload(
         file.file,
-        content_type=file.content_type
+        folder="profile_images",
+        public_id=user["sub"]
     )
-
-    blob.make_public()
 
     return {
         "message": "Profile image uploaded successfully",
-        "image_url": blob.public_url
+        "image_url": result["secure_url"]
     }
-
 @router.get("/api/v1/user/profile", response_model=UserProfileResponse)
 def get_profile(
     db: Session = Depends(get_db),
