@@ -55,22 +55,6 @@ def get_profile(
         date_of_birth=profile.date_of_birth
     )
 
-
-@router.post("/api/v1/user/unlock")
-def unlock_account(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-
-    
-    if not current_user.account_locked:
-        return {"message": "Account already unlocked"}
-
-    
-    current_user.account_locked = False
-    db.commit()
-
-    return {"message": "Account unlocked successfully"}
 @router.put("/profile")
 def update_profile(data: dict, db: Session = Depends(get_db), user=Depends(get_current_user)):
 
@@ -128,7 +112,7 @@ def profile_completion(
         fields["date_of_birth"] = False
 
     return {
-        "profile_completion_percentage": completion,
+        "profile_completion_percentage": f"{completion}%",
         "fields_status": fields
     }
 @router.delete("/api/v1/user/profile-image")
