@@ -71,3 +71,69 @@ def unlock_account(
     db.commit()
 
     return {"message": "Account unlocked successfully"}
+@router.put("/profile")
+def update_profile(data: dict, db: Session = Depends(get_db), user=Depends(get_current_user)):
+
+    profile = db.query(User).filter(User.id == user.id).first()
+
+    profile.name = data["name"]
+    profile.designation = data["designation"]
+
+    db.commit()
+
+    return {
+        "message": "Profile updated successfully"
+    }
+@router.get("/api/v1/user/profile-completion")
+def profile_completion(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+
+    profile = db.query(UserProfile).filter(
+        UserProfile.user_id == current_user.id
+    ).first()
+
+    completion = 0
+    fields = {}
+
+    if profile.user.name:
+        completion += 20
+        fields["name"] = True
+    else:
+        fields["name"] = False
+
+    if profile.user.email:
+        completion += 20
+        fields["email"] = True
+    else:
+        fields["email"] = False
+
+    if profile.primary_address:
+        completion += 20
+        fields["primary_address"] = True
+    else:
+        fields["primary_address"] = False
+
+    if profile.designation:
+        completion += 20
+        fields["designation"] = True
+    else:
+        fields["designation"] = False
+
+    if profile.date_of_birth:
+        completion += 20
+        fields["date_of_birth"] = True
+    else:
+        fields["date_of_birth"] = False
+
+    return {
+        "profile_completion_percentage": completion,
+        "fields_status": fields
+    }
+@router.delete("/api/v1/user/profile-image")
+def delete_profile_image(user=Depends(verify_token)):
+
+    cloudinary.uploader.destroy(f"profile_images/{user['sub']}")
+
+    return {"message": "Profile image deleted"}
