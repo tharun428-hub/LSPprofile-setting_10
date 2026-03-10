@@ -13,7 +13,7 @@ router = APIRouter(prefix="/loan", tags=["Loan"])
 
 
 
-@router.get("/status/{application_id}")
+@router.get("/status/{application_id}") 
 def loan_status(
     application_id: int,
     db: Session = Depends(get_db),
