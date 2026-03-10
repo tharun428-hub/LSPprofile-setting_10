@@ -1,164 +1,308 @@
-Loan Service Platform (LSP) – Backend API
+🏦 LSP Profile Setting & RBAC Service
 
-A FastAPI-based Loan Service Platform (LSP) that manages users, profile settings, loan applications, and admin controls.
-This project provides authentication, profile management, loan application processing, and admin-level user management.
+A FastAPI-based Role Based Access Control (RBAC) microservice for managing users, admins, profile settings, and secure permission-based operations.
 
-🚀 Features
-User Features
+📑 Table of Contents
 
-User Registration & Login
+Project Overview
 
-JWT Authentication
+Modules
 
-Profile Management
+Roles & Permissions
 
-Upload Profile Image
+API Endpoints
 
-Profile Completion Percentage
+Router Architecture
 
-Bank Details Management
+System Architecture
 
-Employee Details Management
+RBAC Permission Matrix
 
-Consent Management
+Database Connection Flow
 
-Loan Application
+Request Lifecycle
 
-Admin Features
+Project Structure
 
-Admin Login
+Installation & Setup
 
-View All Users
+Tech Stack
 
-View Admin Users
+Authentication Flow
+
+Module Completion Summary
+
+Future Enhancements
+
+Author
+
+📌 Project Overview
+
+The LSP Profile Setting System provides:
+
+1️⃣ Secure authentication using JWT tokens
+2️⃣ Role-Based Access Control (RBAC) for Super Admin, Admin, and Users
+3️⃣ User profile management and address settings
+4️⃣ Request-based account operations (lock/unlock/delete)
+5️⃣ Modular FastAPI architecture for scalability and maintainability
+
+🧩 Modules
+1️⃣ Authentication Module
+
+Handles user login and JWT token generation.
+
+2️⃣ Role-Based Access Control (RBAC)
+
+Controls API access based on user roles and permissions.
+
+3️⃣ Admin Management Module
+
+Allows admins to manage users and process system requests.
+
+4️⃣ Profile Settings Module
+
+Handles personal details, employment data, bank information, and address settings.
+
+5️⃣ Change Request Module
+
+Used for sensitive actions that require approval such as account deletion or lock requests.
+
+👥 Roles & Permissions
+Role	Permissions
+Super Admin	Full system access, create admin, lock/unlock users
+Admin	Manage users, process requests, update profiles
+User	Manage own profile & address
+🔐 Super Admin Access
+
+Login
+
+View all users
 
 Create Admin
 
-Delete Users (after request review)
+Delete Users (via request)
 
-Lock / Unlock User Accounts
+Lock / Unlock accounts
 
-View Profile Settings
+Update any user profile
 
-Update Any User Profile
+Access Admin Dashboard
 
-View Dashboard
+👨‍💼 Admin Access
 
-System Features
+Login
 
-Secure Authentication with JWT
+View users
 
-Role-Based Access Control
+View dashboard
 
-Profile Completion Tracking
+Update user data
 
-Email Notification Support
+Process requests
 
-Database Integration with SQLAlchemy
+View profile settings
 
-Modular FastAPI Architecture
+👤 User Access
 
-🏗 Project Structure
-LSPprofiletemp
-│
-├── app
-│   ├── core
-│   │   ├── auth.py
-│   │   ├── config.py
+Login
+
+View own profile
+
+Update personal details
+
+Manage address settings
+
+🔗 API Endpoints
+Authentication
+Method	Endpoint	Description
+POST	/auth/login	User login & JWT token generation
+Admin APIs
+Method	Endpoint	Description
+GET	/admin/users	View all users
+POST	/admin/create	Create admin
+PUT	/admin/lock/{id}	Lock user account
+PUT	/admin/unlock/{id}	Unlock user account
+User APIs
+Method	Endpoint	Description
+GET	/user/profile	View own profile
+PUT	/user/update	Update user details
+Profile Settings APIs
+Method	Endpoint	Description
+GET	/profile/read	Read profile settings
+POST	/profile/address	Add address
+PUT	/profile/address	Update address
+🧭 Router Architecture
+Router	File	Purpose
+Auth Router	routes/auth.py	Authentication
+Admin Router	routes/admin.py	Admin operations
+User Router	routes/user.py	User operations
+Profile Read Router	routes/profile_read.py	Profile viewing
+Profile Address Router	routes/profile_address.py	Address management
+Router Flow
+Client Request
+      ↓
+FastAPI App
+      ↓
+Router (Module Based)
+      ↓
+RBAC Permission Check
+      ↓
+Database (SQLAlchemy)
+      ↓
+Response
+🏗️ System Architecture
+Client / Frontend
+        ↓
+    FastAPI Application
+        ↓
+   Router Layer (Module Based)
+        ↓
+   RBAC Permission Layer
+        ↓
+   Service Layer (Business Logic)
+        ↓
+ Repository Layer (DB Operations)
+        ↓
+     Database (SQLAlchemy)
+Architecture Explanation
+
+Routers → Handle API requests
+
+Permissions Layer → Validates role access
+
+Services → Business logic implementation
+
+Repositories → Database operations
+
+Models → Database table structure
+
+🔐 RBAC Permission Matrix
+Feature	User	Admin	Super Admin
+Login	✔	✔	✔
+View Own Profile	✔	✔	✔
+Update Own Profile	✔	✔	✔
+View All Users	❌	✔	✔
+Create Admin	❌	❌	✔
+Delete User	Request Only	Request Only	✔
+Lock / Unlock Account	Request Only	Request Only	✔
+View Dashboard	❌	✔	✔
+Update Any Profile	❌	✔	✔
+🗄️ Database Connection Flow
+FastAPI Request
+        ↓
+Depends(get_db)
+        ↓
+SQLAlchemy Session
+        ↓
+Model Operations
+        ↓
+Database Engine
+🔄 Request Lifecycle
+User Request
+     ↓
+Router
+     ↓
+JWT Authentication
+     ↓
+RBAC Permission Check
+     ↓
+Service Layer
+     ↓
+Repository Layer
+     ↓
+Database
+     ↓
+Response Returned
+🗂 Project Structure
+LSP_PROFILE_SETTING/
+├── app/
+│   ├── core/
 │   │   ├── database.py
-│   │   ├── email_service.py
 │   │   ├── permissions.py
-│   │   └── dependencies.py
+│   │   └── default_data.py
 │   │
-│   ├── models
+│   ├── models/
 │   │   ├── user.py
-│   │   ├── user_profile.py
-│   │   ├── bank_details.py
-│   │   ├── employee_details.py
-│   │   ├── loan.py
-│   │   ├── consent.py
-│   │   ├── notification.py
 │   │   └── change_request.py
 │   │
-│   ├── routes
+│   ├── routes/
 │   │   ├── auth.py
 │   │   ├── admin.py
 │   │   ├── user.py
-│   │   ├── profile.py
-│   │   └── loan.py
+│   │   ├── profile_read.py
+│   │   └── profile_address.py
+│   │
+│   └── main.py
 │
 ├── requirements.txt
 ├── .env
-├── .gitignore
 └── README.md
-⚙️ Tech Stack
-Technology	Usage
-FastAPI	Backend Framework
-Python	Programming Language
-SQLAlchemy	ORM
-JWT	Authentication
-Pydantic	Data Validation
-PostgreSQL / MySQL	Database
-Swagger UI	API Testing
+⚙️ Installation & Setup
+# Create virtual environment
+python -m venv venv
 
-▶️ Run the Application
+# Activate environment (Windows)
+venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run application
 uvicorn app.main:app --reload
 
-Server will start at:
+Access API Documentation:
 
-http://127.0.0.1:8000
-📘 API Documentation
-
-FastAPI automatically provides interactive documentation.
-
-Swagger UI
 http://127.0.0.1:8000/docs
-ReDoc
-http://127.0.0.1:8000/redoc
-🔐 Authentication
+🧰 Tech Stack
+Layer	Technology
+Framework	FastAPI
+Language	Python 3.10+
+Database	SQLite / PostgreSQL
+ORM	SQLAlchemy
+Authentication	JWT
+Validation	Pydantic
+Server	Uvicorn
+🔐 Authentication Flow
+User Login
+     ↓
+Credential Validation
+     ↓
+JWT Token Generation
+     ↓
+Token Sent to Client
+     ↓
+Protected API Access
+📊 Module Completion Summary
+✔ Completed Features
 
-The API uses JWT Token Authentication.
+JWT Authentication
 
-Steps:
+Role Based Access Control (RBAC)
 
-Login using /login
+Super Admin functionality
 
-Get access token
+Admin dashboard access
 
-Use token in headers
+User profile management
 
-Authorization: Bearer <token>
-📊 Profile Completion Logic
+Address settings module
 
-Profile completion is calculated based on filled user profile fields such as:
+Permission middleware
 
-Name
+Modular router architecture
 
-Email
+🚀 Future Enhancements
 
-Phone Number
+Email verification
 
-Address
+OTP login
 
-Bank Details
+Notification system
 
-Employee Details
+Activity logs
 
-Profile Image
+Docker deployment
 
-Each field contributes to a percentage of profile completion.
+API rate limiting
 
-🧪 Testing APIs
-
-You can test APIs using:
-
-Swagger UI
-
-Postman
-
-Curl
-
-
-📄 License
-
-This project is licensed under the MIT License.
+Module 10 — Profile Settings & RBAC System
