@@ -9,7 +9,7 @@ from app.models.consent import Consent
 from app.models.change_request import ChangeRequest
 
 from app.services.privacy_service import export_user_data
-from app.schemas.export_schema import ExportDataResponse
+from app.schemas.export import ExportDataResponse
 
 
 router = APIRouter(
