@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.models.change_request import ChangeRequest
 from app.models.user import User
-
+from app.models.loan import LoanApplication
 from app.core.database import get_db
+from app.core.auth import get_current_user
 from app.core.permissions import (
     admin_required,
     super_admin_required
@@ -141,6 +142,34 @@ def get_all_users(
     ]
 
 
+@router.post("/admin/decision")
+def loan_decision(
+    application_id: int,
+    decision: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)   
+):
+
+    
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Only admin can make loan decisions"
+        )
+
+    loan = db.query(LoanApplication).filter(
+        LoanApplication.id == application_id
+    ).first()
+
+    if not loan:
+        raise HTTPException(status_code=404, detail="Loan not found")
+
+    loan.status = decision
+    db.commit()
+
+    return {
+        "message": f"Loan {decision} successfully"
+    }
 @router.get("/all-users")
 def all_users(
     db: Session = Depends(get_db),

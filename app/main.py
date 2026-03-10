@@ -14,6 +14,7 @@ from app.routes.admin_dashboard import router as admin_dashboard_router
 from app.routes.admin_change_request import router as admin_change_router
 from app.routes.legal import router as legal_router
 from app.routes import user_settings
+from app.routes import loan
 
 import app.models.user
 import app.models.user_profile
@@ -58,8 +59,7 @@ app.include_router(legal_router)
 
 
 app.include_router(auth.router)
-
-
+app.include_router(loan.router)
 app.include_router(admin.router)
 
 app.include_router(admin_change_router)
